@@ -1,0 +1,41 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: hosty
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  replicas: 3
+  selector:
+    matchLabels:
+      name: hosty
+  template:
+    metadata:
+      labels:
+        name: hosty
+    spec:
+      containers:
+        - name: app
+          image: faux/hostname-reply
+          ports:
+            - containerPort: 1337
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 1337
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hosty
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 1337
+  selector:
+    name: hosty
